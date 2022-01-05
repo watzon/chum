@@ -39,12 +39,12 @@ module HumanResources
     # Executed on the response class
     def pipelines : Array(Chum::Pipelines::Base)
       [
-        Chum::Pipelines::ContentValidator.new(selector: ".logo"),
+        Chum::Pipelines::ContentValidator.new(selector: ".Title-box"),
       ] of Chum::Pipelines::Base
     end
 
     def fetcher : Chum::Fetchers::Base
-      Chum::Fetchers::Stock.new(self)
+      Chum::Fetchers::Default.new(self)
     end
 
     # def fetcher : Chum::Fetchers::Base

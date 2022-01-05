@@ -8,7 +8,7 @@ module Chum
       end
 
       unless results.all?
-        nil
+        return nil
       end
 
       self

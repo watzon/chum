@@ -1,6 +1,6 @@
 module Chum
   module Fetchers
-    struct Stock < Base
+    struct Default < Base
       Log = ::Log.for(self)
 
       def initialize(@spider : Spider)

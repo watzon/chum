@@ -11,7 +11,14 @@ module Chum
 
       def run(request : Request, spider : Spider) : Bool
         path = URI.parse(request.url).path
-        @parser.allowed?(path)
+        valid = @parser.allowed?(path)
+
+        unless valid
+          Log.debug { "Dropping request: #{request.url} (robots.txt filter)" }
+          return false
+        end
+
+        true
       end
     end
   end

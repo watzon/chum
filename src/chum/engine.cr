@@ -19,29 +19,29 @@ module Chum
           request = @request_storage.pop!(spider)
           response = spider.fetcher.fetch(request)
 
-          if response.pipethrough?(spider)
-            if response.status_code == 200
-              parsed_item = spider.parse_item(request, response)
+          if response.status_code == 200
+            parsed_item = spider.parse_item(request, response)
 
-              unless parsed_item.requests.empty?
-                @request_storage.store(spider, parsed_item.requests)
-              end
+            unless parsed_item.requests.empty?
+              @request_storage.store(spider, parsed_item.requests)
+            end
 
-              unless parsed_item.items.empty?
-                spider.parser.parse(parsed_item.items.first.dig(:response))
-              end
-            else
-              Log.error { "The status code of the response was #{response.status_code}, the request will be rescheduled." }
+            unless parsed_item.items.empty?
+              response = parsed_item.items.first.dig(:response)
 
-              if request.is_retriable?
-                request.retry
-                @request_storage.store(spider, request)
-              else
-                Log.debug { "The request was recheduled more than 5 times, dropping the request." }
+              if response.pipethrough?(spider)
+                spider.parser.parse(response)
               end
             end
           else
-            Log.error { "The response failed to pass the pipeline, #{response.url}" }
+            Log.error { "The status code of the response was #{response.status_code}, the request will be rescheduled." }
+
+            if request.is_retriable?
+              request.retry
+              @request_storage.store(spider, request)
+            else
+              Log.debug { "The request was recheduled more than 5 times, dropping the request." }
+            end
           end
         end
 

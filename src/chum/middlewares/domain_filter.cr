@@ -8,7 +8,14 @@ module Chum
         parsed_url = URI.parse(request.url)
         host = parsed_url.host
 
-        base_url.includes?(host.not_nil!)
+        valid = base_url.includes?(host.not_nil!)
+
+        unless valid
+          Log.debug { "Dropping request: #{request.url} (domain filter)" }
+          return false
+        end
+
+        true
       end
     end
   end

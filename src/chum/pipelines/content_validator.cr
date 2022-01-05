@@ -8,8 +8,14 @@ module Chum
 
       def run(response : Response, _spider : Spider) : Bool
         document = Lexbor::Parser.new(response.body)
+        valid = document.find(@selector).size != 0
 
-        document.find(@selector).any?
+        unless valid
+          Log.error { "Page failed validation: #{response.url}" }
+          return false
+        end
+
+        true
       end
     end
   end

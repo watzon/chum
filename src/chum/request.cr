@@ -1,6 +1,7 @@
 module Chum
   class Request < Crest::Request
     Log = ::Log.for(self)
+
     private property retry_count : Int32 = 0
 
     def pipethrough?(spider : Spider) : Request?
@@ -9,7 +10,7 @@ module Chum
       end
 
       unless results.all?
-        nil
+        return nil
       end
 
       self
