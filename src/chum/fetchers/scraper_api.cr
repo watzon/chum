@@ -1,6 +1,6 @@
 module Chum
   module Fetchers
-    struct ScrapeApi < Base
+    struct ScraperApi < Base
       Log = ::Log.for(self)
 
       def initialize(@spider : Spider, @api_key : String)
