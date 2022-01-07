@@ -17,9 +17,10 @@ module Chum
       spawn do
         until @request_storage.empty?(spider)
           request = @request_storage.pop!(spider)
-          response = spider.fetcher.fetch(request)
 
-          if response.status_code == 200
+          begin
+            response = spider.fetcher.fetch(request)
+
             parsed_item = spider.parse_item(request, response)
 
             unless parsed_item.requests.empty?
@@ -33,25 +34,32 @@ module Chum
                 spider.parser.parse(response)
               end
             end
-          else
-            Log.error { "The status code of the response was #{response.status_code}, the request will be rescheduled." }
+          rescue exception : Crest::RequestFailed
+            status_code = exception.response.status_code.to_i
 
-            if request.is_retriable?
-              request.retry
-              @request_storage.store(spider, request)
+            case status_code
+            when 404, 405, 500..511
+              Log.error(exception: exception) { "Dropping the request, failed to get a response status code which could be used to recover a request." }
             else
-              Log.debug { "The request was recheduled more than 5 times, dropping the request." }
+              Log.info { exception.message }
+
+              if request.is_retriable?
+                request.retry
+                @request_storage.store(spider, request)
+              end
             end
+          rescue exception : Exception
+            Log.error(exception: exception) { "Dropping the request, a non HTTP error occured." }
           end
-        end
 
-        if @request_storage.empty?(spider)
-          spider.cache.flush
-          @started_spiders.delete(spider)
-        end
+          if @request_storage.empty?(spider)
+            spider.cache.flush
+            @started_spiders.delete(spider)
+          end
 
-        if @started_spiders.empty?
-          @channel.send(nil)
+          if @started_spiders.empty?
+            @channel.send(nil)
+          end
         end
       end
     end

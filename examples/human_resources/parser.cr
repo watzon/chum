@@ -28,7 +28,7 @@ module HumanResources
     def parse(response : Crest::Response) : Void
       document = Lexbor::Parser.new(response.body)
 
-      _id = document.find("h4.text-center").first.inner_text.strip.split(" ").last
+      id = document.find("h4.text-center").first.inner_text.strip.split(" ").last
       keys = document.find("dl.dl-horizontal dt").map(&.inner_text.strip)
       values = document.find("dl.dl-horizontal dd").map(&.inner_text.strip)
 
@@ -44,6 +44,8 @@ module HumanResources
       pairs.each do |pair|
         table.merge!(pair)
       end
+
+      puts "ID: #{id}"
     end
   end
 end

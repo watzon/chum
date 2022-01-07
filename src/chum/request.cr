@@ -27,6 +27,7 @@ module Chum
     end
 
     def retry : Void
+      Log.info { "Retrying the request to #{self.url}." }
       @retry_count += 1
     end
   end

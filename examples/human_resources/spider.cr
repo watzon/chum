@@ -28,7 +28,6 @@ module HumanResources
       Parser.new
     end
 
-    # Executed on the request class
     def middlewares : Array(Chum::Middlewares::Base)
       [
         Chum::Middlewares::DomainFilter.new,
@@ -36,7 +35,6 @@ module HumanResources
       ]
     end
 
-    # Executed on the response class
     def pipelines : Array(Chum::Pipelines::Base)
       [
         Chum::Pipelines::ContentValidator.new(selector: ".Title-box"),
@@ -46,14 +44,6 @@ module HumanResources
     def fetcher : Chum::Fetchers::Base
       Chum::Fetchers::Default.new(self)
     end
-
-    # def fetcher : Chum::Fetchers::Base
-    #   Chum::Fetchers::ScrapeAPi.new(self, api_key: "fbz870e31az5e8ff392812928dd712i3k")
-    # end
-
-    # def fetcher : Chum::Fetchers::Base
-    #   Chum::Fetchers::ProxiesApi.new(self, api_key: "fbz870e31az5e8ff392812928dd712i3k_jkoq_sqqmz1")
-    # end
 
     def parse_item(request : Chum::Request, response : Chum::Response) : Chum::ParsedItem
       cache.delete!(request.url)
