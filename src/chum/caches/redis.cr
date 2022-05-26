@@ -3,9 +3,9 @@ module Chum
     struct Redis < Base
       Log = ::Log.for(self)
 
-      property spider : Spider
+      property id : String
 
-      def initialize(@spider : Spider)
+      def initialize(@id : String)
         @client = ::Redis.new
       end
 
@@ -31,7 +31,7 @@ module Chum
       end
 
       private def key : String
-        %(#{@spider.id}:urls-cache)
+        %(#{@id}:urls-cache)
       end
     end
   end

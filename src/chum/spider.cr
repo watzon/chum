@@ -12,5 +12,6 @@ module Chum
     abstract def middlewares : Array(Middlewares::Base)
     abstract def pipelines : Array(Pipelines::Base)
     abstract def fetcher : Fetchers::Base
+    abstract def renderer : Renderers::Base
   end
 end

@@ -3,9 +3,9 @@ module Chum
     abstract struct Base
       Log = ::Log.for(self)
 
-      property spider : Spider
+      property id : String
 
-      def initialize(@spider : Spider)
+      def initialize(@id : String)
       end
 
       abstract def save!(url) : Void

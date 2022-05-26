@@ -14,6 +14,10 @@ module Chum
           raise Exception.new
         end
       end
+
+      def url(request : Request) : Request
+        request
+      end
     end
   end
 end

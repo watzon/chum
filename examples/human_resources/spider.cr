@@ -2,49 +2,47 @@ module HumanResources
   class Spider
     include Chum::Spider
 
-    def id : String
-      "hr-gov-ge"
-    end
+    # Identificator of the spider throughout the whole system.
+    property id : String = "hr-gov-ge"
 
-    def base_url : String
-      "https://www.hr.gov.ge/"
-    end
+    # The base URL of the website.
+    property base_url : String = "https://www.hr.gov.ge/"
 
-    def cache : Chum::Caches::Base
-      Chum::Caches::Redis.new(self)
-    end
+    # Start URL's for the spider.
+    property start_urls : Array(String) = ["https://www.hr.gov.ge/?pageNo=1"]
 
-    def start_urls : Array(String)
-      [
-        "https://www.hr.gov.ge/?pageNo=1",
-      ]
-    end
+    # Caching mechanism used by the spider to cache the requests in case of a restart/failure.
+    property cache : Chum::Caches::Base = Chum::Caches::Redis.new(id: "hr-gov-ge")
 
+    # Parser used by the spider to parse the HTML content.
+    property parser : Chum::Parser = Parser.new
+
+    # Middlewares used by the spider to filter the requests.
+    property middlewares : Array(Chum::Middlewares::Base) = [Chum::Middlewares::DomainFilter.new, Chum::Middlewares::UserAgent.new]
+
+    # Pipelines used by the spider to filter the responses.
+    property pipelines : Array(Chum::Pipelines::Base) = [Chum::Pipelines::ContentValidator.new(selector: ".Title-box")] of Chum::Pipelines::Base
+
+    #
+    # Rendering client which can be used by the spider to render the content without the fetchers.
+    #
+    # If you want to use the Chrome renderer add the chromedriver to your PATH
+    # and change this line to:
+    # property renderer : Chum::Renderers::Base = Chum::Renderers::Chrome.instance
+    #
+    property renderer : Chum::Renderers::Base = Chum::Renderers::Default.instance
+
+    # Used by the caching mechanism to retrieve the requests from the cache.
     def start_requests : Array(Chum::Request)
       cache.list_requests!(base_url())
     end
 
-    def parser : Chum::Parser
-      Parser.new
-    end
-
-    def middlewares : Array(Chum::Middlewares::Base)
-      [
-        Chum::Middlewares::DomainFilter.new,
-        Chum::Middlewares::UserAgent.new,
-      ]
-    end
-
-    def pipelines : Array(Chum::Pipelines::Base)
-      [
-        Chum::Pipelines::ContentValidator.new(selector: ".Title-box"),
-      ] of Chum::Pipelines::Base
-    end
-
+    # Fetcher used by the spider to request the URL's.
     def fetcher : Chum::Fetchers::Base
       Chum::Fetchers::Default.new(self)
     end
 
+    # Parsing logic to identify the listing URL's from pagination URL's
     def parse_item(request : Chum::Request, response : Chum::Response) : Chum::ParsedItem
       cache.delete!(request.url)
 
@@ -68,6 +66,7 @@ module HumanResources
       end
     end
 
+    # Parse HTML for listing URL's.
     def listing_urls(document : Lexbor::Parser) : Array(String)
       document
         .find(".table.vacans-table.additional-documents a")
@@ -76,6 +75,7 @@ module HumanResources
         .map { |href| Chum::Utils.build_absolute_url(href, base_url) }
     end
 
+    # Parse HTML for pagination URL's
     def pagination_urls(document : Lexbor::Parser) : Array(String)
       document
         .find("li.PagedList-skipToNext a")

@@ -17,6 +17,10 @@ module Chum
           raise Exception.new
         end
       end
+
+      def url(request : Request) : Request
+        Request.new(:get, "http://api.scraperapi.com?api_key=#{@api_key}&url=#{request.url}")
+      end
     end
   end
 end

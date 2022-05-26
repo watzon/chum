@@ -7,6 +7,7 @@ module Chum
       end
 
       abstract def fetch(request : Request) : Response
+      abstract def url(request : Request) : Request
     end
   end
 end

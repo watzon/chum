@@ -19,20 +19,18 @@ module Chum
           request = @request_storage.pop!(spider)
 
           begin
-            response = spider.fetcher.fetch(request)
+            if !spider.renderer.fall_through
+              request = spider.fetcher.url(request)
+              response = spider.renderer.render(request)
 
-            parsed_item = spider.parse_item(request, response)
+              parsed_item = spider.parse_item(request, response)
 
-            unless parsed_item.requests.empty?
-              @request_storage.store(spider, parsed_item.requests)
-            end
+              parse(spider, parsed_item)
+            else
+              response = spider.fetcher.fetch(request)
+              parsed_item = spider.parse_item(request, response)
 
-            unless parsed_item.items.empty?
-              response = parsed_item.items.first.dig(:response)
-
-              if response.pipethrough?(spider)
-                spider.parser.parse(response)
-              end
+              parse(spider, parsed_item)
             end
           rescue exception : Crest::RequestFailed
             status_code = exception.response.status_code.to_i
@@ -72,6 +70,28 @@ module Chum
       spider.cache.flush
       @request_storage.flush(spider)
       @started_spiders.delete(spider)
+    end
+
+    private def parse(spider : Spider, parsed_item : ParsedItem) : Void
+      unless parsed_item.requests.empty?
+        parse_requests(spider, parsed_item)
+      end
+
+      unless parsed_item.items.empty?
+        parse_items(spider, parsed_item)
+      end
+    end
+
+    private def parse_requests(spider : Spider, parsed_item : ParsedItem) : Void
+      @request_storage.store(spider, parsed_item.requests)
+    end
+
+    private def parse_items(spider : Spider, parsed_item : ParsedItem) : Void
+      response = parsed_item.items.first.dig(:response)
+
+      if response.pipethrough?(spider)
+        spider.parser.parse(response)
+      end
     end
   end
 end
