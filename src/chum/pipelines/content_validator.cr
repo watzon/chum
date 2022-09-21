@@ -6,7 +6,7 @@ module Chum
       def initialize(@selector : String)
       end
 
-      def run(response : Response, _spider : Spider) : Bool
+      def run(response : Response, spider : Spider) : Bool
         document = Lexbor::Parser.new(response.body)
         valid = document.find(@selector).size != 0
 

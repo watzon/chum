@@ -2,8 +2,11 @@ module HumanResources
   class Spider
     include Chum::Spider
 
+    # Class variable for the identificator.
+    @@id = "hr-gov-ge"
+
     # Identificator of the spider throughout the whole system.
-    property id : String = "hr-gov-ge"
+    property id : String = @@id
 
     # The base URL of the website.
     property base_url : String = "https://www.hr.gov.ge/"
@@ -12,7 +15,7 @@ module HumanResources
     property start_urls : Array(String) = ["https://www.hr.gov.ge/?pageNo=1"]
 
     # Caching mechanism used by the spider to cache the requests in case of a restart/failure.
-    property cache : Chum::Caches::Base = Chum::Caches::Redis.new(id: "hr-gov-ge")
+    property cache : Chum::Caches::Base = Chum::Caches::Redis.new(@@id)
 
     # Parser used by the spider to parse the HTML content.
     property parser : Chum::Parser = Parser.new
@@ -28,9 +31,9 @@ module HumanResources
     #
     # If you want to use the Chrome renderer add the chromedriver to your PATH
     # and change this line to:
-    # property renderer : Chum::Renderers::Base = Chum::Renderers::Chrome.instance
+    # property renderer : Chum::Renderers::Base = Chum::Renderers::Chrome.new
     #
-    property renderer : Chum::Renderers::Base = Chum::Renderers::Default.instance
+    property renderer : Chum::Renderers::Base = Chum::Renderers::Default.new
 
     # Used by the caching mechanism to retrieve the requests from the cache.
     def start_requests : Array(Chum::Request)

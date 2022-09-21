@@ -1,12 +1,8 @@
+require "marionette"
+
 module Chum
   module Renderers
     struct Chrome < Base
-      @@instance = new
-
-      def self.instance
-        @@instance
-      end
-
       property session : Marionette::Session = Marionette::WebDriver.create_session(:chrome, capabilities: Marionette.chrome_options(args: ["headless"]))
 
       def fall_through : Bool

@@ -1,12 +1,6 @@
 module Chum
   module Renderers
     struct Default < Base
-      @@instance = new
-
-      def self.instance
-        @@instance
-      end
-
       def fall_through : Bool
         true
       end
